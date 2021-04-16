@@ -33,11 +33,11 @@ d3.csv("data.csv").then(function(stateData) {
     // Step 2: Create scale functions
     // ==============================
     var xLinearScale = d3.scaleLinear()
-      .domain([40000, d3.max(stateData, d => d.income)])
-      .range([0, width]);
+      .domain([38000, d3.max(stateData, d => d.income)])
+      .range([15, width]);
 
     var yLinearScale = d3.scaleLinear()
-      .domain([0, d3.max(stateData, d => d.obesity)])
+      .domain([20, d3.max(stateData, d => d.obesity)])
       .range([height, 0]);
 
     // Step 3: Create axis functions
@@ -62,8 +62,8 @@ d3.csv("data.csv").then(function(stateData) {
     .append("circle")
     .attr("cx", d => xLinearScale(d.income))
     .attr("cy", d => yLinearScale(d.obesity))
-    .attr("r", "15")
-    .attr("fill", "pink")
+    .attr("r", "12")
+    .attr("fill", "blue")
     .attr("opacity", ".5");
 
     // Step 6: Initialize tool tip
@@ -72,7 +72,7 @@ d3.csv("data.csv").then(function(stateData) {
       .attr("class", "tooltip")
       .offset([80, -60])
       .html(function(d) {
-        return (`${d.rockband}<br>Hair length: ${d.income}<br>Hits: ${d.obesity}`);
+        return (`${d.state}<br>Income: $${d.income}<br>Obesity: ${d.obesity}%`);
       });
 
     // Step 7: Create tooltip in the chart
@@ -96,12 +96,12 @@ d3.csv("data.csv").then(function(stateData) {
       .attr("x", 0 - (height / 2))
       .attr("dy", "1em")
       .attr("class", "axisText")
-      .text("Number of Billboard 100 Hits");
+      .text("Obesity (%)");
 
     chartGroup.append("text")
       .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
       .attr("class", "axisText")
-      .text("Hair Metal Band Hair Length (inches)");
+      .text("Income ($)");
   }).catch(function(error) {
     console.log(error);
   });
