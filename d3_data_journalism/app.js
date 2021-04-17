@@ -1,6 +1,8 @@
+// create two numbers for svg that will be used later
 var svgWidth = 960;
 var svgHeight = 500;
 
+// set all of the margins in a dictionary
 var margin = {
   top: 20,
   right: 40,
@@ -8,30 +10,29 @@ var margin = {
   left: 100
 };
 
+// create width and height variables
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
-// Create an SVG wrapper, append an SVG group that will hold our chart, and shift the latter by left and top margins.
+// add an svg to html code and give it height and width attributes
 var svg = d3.select("body")
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
 
+//   add a group to the svg and flip it the correct way
 var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// Import Data
+// go through the csv
 d3.csv("data.csv").then(function(stateData) {
 
-    // Step 1: Parse Data/Cast as numbers
-    // ==============================
+    // take the data that we need and add it to a list 
     stateData.forEach(function(data) {
       data.income = +data.income;
       data.obesity = +data.obesity;
     });
-
-    // Step 2: Create scale functions
-    // ==============================
+    // create the x scale and y scales based on the data that was chosen
     var xLinearScale = d3.scaleLinear()
       .domain([38000, d3.max(stateData, d => d.income)])
       .range([15, width]);
@@ -40,13 +41,11 @@ d3.csv("data.csv").then(function(stateData) {
       .domain([20, d3.max(stateData, d => d.obesity)])
       .range([height, 0]);
 
-    // Step 3: Create axis functions
-    // ==============================
+    //   create variables that use these scales for later use
     var bottomAxis = d3.axisBottom(xLinearScale);
     var leftAxis = d3.axisLeft(yLinearScale);
 
-    // Step 4: Append Axes to the chart
-    // ==============================
+    // give these two variables to the chartgroup so that it can adjust the scale
     chartGroup.append("g")
       .attr("transform", `translate(0, ${height})`)
       .call(bottomAxis);
@@ -54,33 +53,49 @@ d3.csv("data.csv").then(function(stateData) {
     chartGroup.append("g")
       .call(leftAxis);
 
-    // Step 5: Create Circles
-    // ==============================
+    // create the circles that will be going on the chart
     var circlesGroup = chartGroup.selectAll("circle")
+    // set the data that the circles will take
     .data(stateData)
     .enter()
+    // add
     .append("circle")
+    // grab the data and scale the axis based on this 
     .attr("cx", d => xLinearScale(d.income))
     .attr("cy", d => yLinearScale(d.obesity))
+    // create the radius of the circle
     .attr("r", "12")
+    // color
     .attr("fill", "blue")
+    // opacity
     .attr("opacity", ".5");
+    // trying to add the text to the circles
+    circlesGroup.append("text")
+    .text(function(d) { return d.abbr; })
+    .attr({
+        "text-anchor": "middle",
+        "font-size": function(d) {
+          return 12 / ((12 * 10) / 100);
+        },
+        "dy": function(d) {
+          return 12 / ((12 * 25) / 100);
+        }
+      });
 
-    // Step 6: Initialize tool tip
-    // ==============================
+
+
+    // create the tooltip
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       .offset([80, -60])
       .html(function(d) {
+        //   says what the tool tip will be showing
         return (`${d.state}<br>Income: $${d.income}<br>Obesity: ${d.obesity}%`);
       });
-
-    // Step 7: Create tooltip in the chart
-    // ==============================
+    //   put the tooltip in the chart
     chartGroup.call(toolTip);
 
-    // Step 8: Create event listeners to display and hide the tooltip
-    // ==============================
+    // add onClick event listener
     circlesGroup.on("click", function(data) {
       toolTip.show(data, this);
     })
@@ -89,7 +104,7 @@ d3.csv("data.csv").then(function(stateData) {
         toolTip.hide(data);
       });
 
-    // Create axes labels
+    // create the labels for the chart
     chartGroup.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 0 - margin.left + 40)
